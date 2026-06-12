@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ノースベッツ牛群データ記録</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --green:#1E4D35;--green2:#2D6B4A;--green3:#3D8B60;--green-light:#EAF3EE;
+  --amber:#C17D2A;--red:#B03A2E;
+  --bg:#F5F4F0;--white:#FFFFFF;--text:#1A2E23;--text2:#4A6355;--border:#D4DDD8;
+  --radius:12px;--radius-sm:8px;
+  --cow-black:#1a1a1a;--cow-white:#f8f6f0;
+}
+body{font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:70px;}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    radial-gradient(ellipse 38px 28px at 8% 12%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 22px 32px at 18% 6%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 44px 22px at 35% 18%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 18px 26px at 55% 8%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 30px 20px at 72% 15%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 26px 34px at 88% 5%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 20px 24px at 95% 22%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 36px 20px at 4% 38%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 28px 18px at 28% 45%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 40px 26px at 62% 35%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 24px 30px at 82% 42%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 32px 22px at 12% 62%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 20px 28px at 42% 68%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 34px 18px at 68% 58%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 22px 32px at 90% 65%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 28px 20px at 22% 82%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 38px 24px at 50% 88%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 18px 28px at 76% 78%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 26px 16px at 5% 92%, #1a1a1a 100%, transparent 100%),
+    radial-gradient(ellipse 30px 22px at 95% 88%, #1a1a1a 100%, transparent 100%);
+  background-color:#f8f6f0;
+  opacity:0.07;
+}
+#app{max-width:480px;margin:0 auto;}
+.app-header{background:var(--green);color:#fff;padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;}
+.app-header::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    radial-gradient(ellipse 24px 16px at 75% 20%, rgba(255,255,255,0.12) 100%, transparent 100%),
+    radial-gradient(ellipse 14px 20px at 82% 10%, rgba(255,255,255,0.10) 100%, transparent 100%),
+    radial-gradient(ellipse 18px 12px at 90% 30%, rgba(255,255,255,0.08) 100%, transparent 100%),
+    radial-gradient(ellipse 20px 14px at 68% 60%, rgba(255,255,255,0.09) 100%, transparent 100%),
+    radial-gradient(ellipse 12px 18px at 95% 65%, rgba(255,255,255,0.07) 100%, transparent 100%),
+    radial-gradient(ellipse 16px 10px at 60% 85%, rgba(255,255,255,0.08) 100%, transparent 100%);
+  background-color:transparent;
+}
+.app-header h1{font-size:18px;font-weight:700;position:relative;}
+.app-header .sub{font-size:11px;opacity:.7;letter-spacing:1.5px;}
+.farm-selector{display:flex;align-items:center;gap:8px;}
+.farm-selector select{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:999px;font-size:13px;font-family:inherit;font-weight:700;}
+.farm-selector select option{background:var(--green);color:#fff;}
+.add-farm-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:center;justify-content:center;}
+.modal{background:#fff;border-radius:16px;padding:24px 20px;width:calc(100% - 40px);max-width:360px;}
+.modal h3{font-size:16px;margin-bottom:16px;color:var(--green);}
+.modal input{width:100%;padding:12px;font-size:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;margin-bottom:12px;}
+.modal-btns{display:flex;gap:8px;}
+.modal-btns button{flex:1;padding:12px;border-radius:var(--radius-sm);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;border:none;}
+.btn-cancel{background:var(--bg);color:var(--text2);}
+.btn-ok{background:var(--green);color:#fff;}
+.page-nav{background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;display:flex;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.page-nav::-webkit-scrollbar{display:none;}
+.page-nav button{padding:12px 14px;font-size:13px;font-weight:700;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;border-bottom:3px solid transparent;flex-shrink:0;}
+.page-nav button.active{color:var(--green);border-bottom-color:var(--green);}
+.card{background:var(--white);border-radius:var(--radius);padding:16px;margin:12px 12px 0;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:4px solid transparent;background-clip:padding-box;}
+.card-title{font-size:15px;font-weight:700;color:var(--green);margin-bottom:14px;padding-bottom:10px;border-bottom:2px dashed var(--green-light);}
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field label{font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;}
+.field input,.field textarea,.field select{width:100%;padding:11px 12px;font-size:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;background:#FAFAF8;color:var(--text);}
+.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--green3);border-color:var(--green3);}
+.field textarea{resize:vertical;min-height:80px;}
+.unit{font-size:12px;color:var(--text2);margin-left:4px;}
+.ph-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ph-btn{width:44px;height:44px;font-size:22px;font-weight:700;border:1.5px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;color:var(--green);font-family:inherit;display:flex;align-items:center;justify-content:center;}
+.ph-strip-bar{flex:1;height:14px;border-radius:7px;position:relative;background:linear-gradient(90deg,rgb(198,64,50) 0%,rgb(228,160,50) 25%,rgb(212,196,60) 37%,rgb(110,168,80) 50%,rgb(60,140,150) 75%,rgb(70,90,160) 100%);}
+.ph-strip-marker{position:absolute;top:-5px;width:18px;height:24px;border-radius:5px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:left .1s;}
+.save-btn{width:100%;padding:15px;font-size:17px;font-weight:700;border:none;border-radius:var(--radius);background:var(--green);color:#fff;cursor:pointer;font-family:inherit;margin-top:4px;}
+.save-msg{margin-top:10px;font-size:13px;font-weight:700;color:var(--green);text-align:center;}
+.err-msg{color:var(--red);}
+.date-bar{background:var(--green-light);border-radius:var(--radius-sm);padding:10px 14px;margin:12px 12px 0;display:flex;align-items:center;justify-content:space-between;}
+.date-bar label{font-size:12px;font-weight:700;color:var(--green2);}
+.date-bar input{border:none;background:transparent;font-size:15px;font-weight:700;color:var(--green);font-family:inherit;text-align:right;}
+.records-section{margin:12px 12px 0;}
+.records-section h3{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+.record-item{background:var(--white);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:flex;justify-content:space-between;align-items:flex-start;}
+.record-item .rec-content{font-size:14px;font-weight:700;flex:1;}
+.record-item .rec-tag{font-size:11px;color:var(--green3);background:var(--green-light);padding:2px 7px;border-radius:999px;margin-bottom:4px;display:inline-block;}
+.del-btn{border:none;background:transparent;color:#aaa;font-size:12px;cursor:pointer;padding:4px;font-family:inherit;flex-shrink:0;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--green);display:flex;z-index:10;border-top:3px solid rgba(255,255,255,0.15);}
+.bottom-nav::before{content:'🐄';position:absolute;right:8px;top:-18px;font-size:20px;opacity:0.6;pointer-events:none;}
+.bottom-nav button{flex:1;padding:10px 4px;font-size:10px;font-weight:700;border:none;background:transparent;color:rgba(255,255,255,.65);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bottom-nav button.active{color:#fff;background:var(--green2);}
+.bottom-nav .nav-icon{font-size:16px;}
+.chart-card{background:var(--white);border-radius:var(--radius);padding:14px 12px;margin:12px 12px 0;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.chart-card h3{font-size:14px;font-weight:700;color:var(--green);margin-bottom:6px;}
+.chart-note{font-size:11px;color:var(--text2);margin-top:6px;}
+.chart-empty{text-align:center;padding:24px 10px;color:var(--text2);font-size:13px;}
+.export-bar{margin:12px 12px 0;display:flex;gap:8px;}
+.export-btn{flex:1;padding:12px;font-size:14px;font-weight:700;border:1.5px solid var(--green);border-radius:var(--radius-sm);background:#fff;color:var(--green);cursor:pointer;font-family:inherit;}
+.score-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.score-chip{flex:1;min-width:60px;padding:10px 4px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;text-align:center;color:var(--text2);}
+.score-chip.selected{background:var(--green);color:#fff;border-color:var(--green);}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="app-header">
+    <div>
+      <div class="sub">🐄 NORTH VETS</div>
+      <h1>牛群データ記録</h1>
+    </div>
+    <div class="farm-selector">
+      <select id="farmSelect"></select>
+      <button class="add-farm-btn" id="addFarmBtn">＋</button>
+    </div>
+  </header>
+
+  <div class="modal-overlay hidden" id="farmModal">
+    <div class="modal">
+      <h3>農場を追加</h3>
+      <input type="text" id="newFarmInput" placeholder="農場名を入力">
+      <div class="modal-btns">
+        <button class="btn-cancel" id="farmModalCancel">キャンセル</button>
+        <button class="btn-ok" id="farmModalOk">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="viewRecord">
+    <div class="date-bar">
+      <label>訪問日</label>
+      <input type="date" id="visitDate">
+    </div>
+    <nav class="page-nav" id="pageNav"></nav>
+    <div id="pageContent"></div>
+  </div>
+
+  <div id="viewList" class="hidden">
+    <nav class="page-nav" id="listPageNav"></nav>
+    <div class="export-bar">
+      <button class="export-btn" id="csvExportBtn">📥 CSVエクスポート</button>
+    </div>
+    <div id="listContent"></div>
+  </div>
+
+  <div id="viewChart" class="hidden">
+    <nav class="page-nav" id="chartPageNav"></nav>
+    <div class="export-bar">
+      <button class="export-btn" id="chartCsvExportBtn">📥 グラフデータCSV</button>
+    </div>
+    <div id="chartContent"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="active" data-view="record"><span class="nav-icon">✏️</span>記録</button>
+    <button data-view="list"><span class="nav-icon">📋</span>一覧</button>
+    <button data-view="chart"><span class="nav-icon">📈</span>グラフ</button>
+  </nav>
+</div>
+
+<script>
+const STORE_KEY = "dairy:v2";
+const PH_MIN = 6.0;
+const PH_MAX = 6.8;
+
+// ページ定義
+const PAGES = [
+  { id:"production", label:"生産データ", custom:"production" },
+  { id:"silage", label:"GS", custom:"silage" },
+  { id:"silage_corn", label:"CS", custom:"silage_corn" },
+  { id:"ph", label:"尿pH", custom:"ph" },
+  { id:"feces", label:"糞便検査", custom:"feces" },
+  { id:"pssb", label:"PSPS", custom:"pssb" },
+];
+
+let records = [], farms = ["農場1"], currentFarm = "農場1";
+let currentPage = "production", currentView = "record", phVal = 7.0;
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function phColor(p) {
+  const stops=[[5,[198,64,50]],[6,[228,160,50]],[6.5,[212,196,60]],[7,[110,168,80]],[8,[60,140,150]],[9,[70,90,160]]];
+  p=Math.max(5,Math.min(9,p));
+  for(let i=0;i<stops.length-1;i++){const [a,ca]=stops[i],[b,cb]=stops[i+1];if(p>=a&&p<=b){const t=(p-a)/(b-a);const c=ca.map((v,j)=>Math.round(v+(cb[j]-v)*t));return "rgb("+c[0]+","+c[1]+","+c[2]+")";}}
+  return "rgb(110,168,80)";
+}
+function persist(){localStorage.setItem(STORE_KEY,JSON.stringify({records,farms,currentFarm}));}
+function load(){
+  try{const v=localStorage.getItem(STORE_KEY);if(v){const d=JSON.parse(v);records=d.records||[];if(d.farms&&d.farms.length)farms=d.farms;if(d.currentFarm&&farms.includes(d.currentFarm))currentFarm=d.currentFarm;}}catch(e){}
+}
+
+// Farm selector
+function renderFarmSelect(){
+  document.getElementById("farmSelect").innerHTML=farms.map(f=>'<option value="'+f+'"'+(f===currentFarm?' selected':'')+'>'+f+'</option>').join("");
+}
+document.getElementById("farmSelect").onchange=e=>{currentFarm=e.target.value;persist();if(currentView==="list"){renderListNav();renderList();}if(currentView==="chart"){renderChartNav();renderChart();}};
+document.getElementById("addFarmBtn").onclick=()=>{document.getElementById("newFarmInput").value="";document.getElementById("farmModal").classList.remove("hidden");};
+document.getElementById("farmModalCancel").onclick=()=>document.getElementById("farmModal").classList.add("hidden");
+document.getElementById("farmModalOk").onclick=()=>{
+  const name=document.getElementById("newFarmInput").value.trim();
+  if(!name)return;if(farms.includes(name)){alert("同じ名前の農場があります");return;}
+  farms.push(name);currentFarm=name;persist();renderFarmSelect();document.getElementById("farmModal").classList.add("hidden");
+};
+document.getElementById("newFarmInput").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("farmModalOk").click();});
+
+// Page nav
+function renderPageNav(){
+  const nav=document.getElementById("pageNav");
+  nav.innerHTML=PAGES.map(p=>'<button data-page="'+p.id+'"'+(p.id===currentPage?' class="active"':'')+'>'+p.label+'</button>').join("");
+  nav.querySelectorAll("button").forEach(btn=>{btn.onclick=()=>{currentPage=btn.dataset.page;renderPageNav();renderPageContent();};});
+  const active=nav.querySelector(".active");if(active)active.scrollIntoView({inline:"center",behavior:"smooth"});
+}
+
+// スコアチップUI
+function scoreChips(id, labels) {
+  return '<div class="score-chips" id="chips_'+id+'">'+labels.map((l,i)=>'<button type="button" class="score-chip" data-val="'+(i+1)+'" onclick="selectChip(\''+id+'\','+(i+1)+')">'+l+'</button>').join("")+'</div>'
+    +'<input type="hidden" id="'+id+'" value="">';
+}
+window.selectChip = function(id, val) {
+  document.getElementById(id).value = val;
+  document.querySelectorAll('#chips_'+id+' .score-chip').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.val == val);
+  });
+};
+
+// Page content
+function renderPageContent(){
+  const page=PAGES.find(p=>p.id===currentPage);
+  const el=document.getElementById("pageContent");
+
+  // --- 尿pH ---
+  if(page.custom==="ph"){
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">尿pH記録 <span style="font-size:12px;color:var(--text2);font-weight:500;">目標: '+PH_MIN.toFixed(1)+'–'+PH_MAX.toFixed(1)+'</span></div>'
+      +'<div class="field"><label>牛の番号・名前</label>'
+      +'<input type="text" id="ph_cow" placeholder="例: 102号" list="cowlist" autocomplete="off">'
+      +'<datalist id="cowlist"></datalist></div>'
+      +'<div class="field"><label>pH値</label>'
+      +'<div class="ph-row">'
+      +'<button class="ph-btn" id="phMinus">−</button>'
+      +'<div style="text-align:center"><div id="phNumDisplay" style="font-size:40px;font-weight:700;min-width:80px;"></div>'
+      +'<div id="phRangeLabel" style="font-size:11px;font-weight:700;margin-top:2px;"></div></div>'
+      +'<button class="ph-btn" id="phPlus">＋</button>'
+      +'<div style="flex:1"><div class="ph-strip-bar" style="position:relative;">'
+      +'<div id="phTargetRange" style="position:absolute;top:-3px;bottom:-3px;border:2px solid var(--green);border-radius:4px;pointer-events:none;"></div>'
+      +'<div class="ph-strip-marker" id="phMarker"></div></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-top:5px;"><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>'
+      +'</div></div></div>'
+      +'<div class="field"><label>メモ</label><input type="text" id="ph_memo" placeholder="任意"></div>'
+      +'<button class="save-btn" id="phSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="phSaveMsg"></div></div>';
+    updatePhDisplay();updateCowlist();
+    document.getElementById("phMinus").onclick=()=>{phVal=Math.max(4,Math.round((phVal-0.1)*10)/10);updatePhDisplay();};
+    document.getElementById("phPlus").onclick=()=>{phVal=Math.min(10,Math.round((phVal+0.1)*10)/10);updatePhDisplay();};
+    document.getElementById("phSaveBtn").onclick=savePhRecord;
+    return;
+  }
+
+  // --- 生産データ（乳成分・乳価・生産量 統合） ---
+  if(page.custom==="production"){
+    const now=new Date();
+    const yearOpts=Array.from({length:6},(_,i)=>now.getFullYear()-2+i).map(y=>'<option value="'+y+'"'+(y===now.getFullYear()?' selected':'')+'>'+y+'年</option>').join("");
+    const monthOpts=Array.from({length:12},(_,i)=>i+1).map(m=>'<option value="'+m+'"'+(m===now.getMonth()+1?' selected':'')+'>'+m+'月</option>').join("");
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">生産データ</div>'
+
+      // --- 乳量 ---
+      +'<div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;padding:6px 0;border-bottom:1px solid var(--green-light);">📦 出荷乳量</div>'
+      +'<div class="field"><label>出荷乳量1 (L/日)</label><input type="number" id="prod_milk_l1" step="1" placeholder="例: 1500" oninput="calcProd()"></div>'
+      +'<div class="field"><label>出荷乳量2 (L/日)</label><input type="number" id="prod_milk_l2" step="1" placeholder="例: 1500" oninput="calcProd()"></div>'
+      +'<div class="field"><label>出荷乳量3 (L/日)</label><input type="number" id="prod_milk_l3" step="1" placeholder="例: 1078" oninput="calcProd()"></div>'
+      +'<div style="background:#f5f7f5;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--green2);">出荷乳量合計 (L)</span>'
+      +'<span id="prod_milk_l_total" style="font-size:18px;font-weight:700;color:var(--green);">—</span>'
+      +'</div>'
+      +'<div class="field"><label>搾乳頭数 (頭)</label><input type="number" id="prod_milking" step="1" placeholder="例: 85"></div>'
+      +'<div class="field"><label>出荷頭数 (頭)</label><input type="number" id="prod_shipped" step="1" placeholder="例: 85" oninput="calcProd()"></div>'
+      +'<div class="field"><label>給餌量 (kg/日)</label><input type="number" id="prod_feed" step="0.1" placeholder="例: 4080" oninput="calcProd()"></div>'
+
+      // --- 乳成分 ---
+      +'<div style="font-size:13px;font-weight:700;color:var(--green2);margin:14px 0 10px;padding:6px 0;border-bottom:1px solid var(--green-light);">🧪 乳成分</div>'
+      +'<div class="field"><label>乳脂肪率 (%)</label><input type="number" id="mc_fat" step="0.01" placeholder="例: 3.85" oninput="calcProd()"></div>'
+      +'<div class="field"><label>乳蛋白質率 (%)</label><input type="number" id="mc_protein" step="0.01" placeholder="例: 3.21" oninput="calcProd()"></div>'
+      +'<div class="field"><label>無脂固形分率 (%)</label><input type="number" id="mc_snf" step="0.01" placeholder="例: 8.72"></div>'
+      +'<div class="field"><label>MUN (mg/dL)</label><input type="number" id="mc_mun" step="0.1" placeholder="例: 12.5"></div>'
+
+      // --- 乳価 ---
+      +'<div style="font-size:13px;font-weight:700;color:var(--green2);margin:14px 0 10px;padding:6px 0;border-bottom:1px solid var(--green-light);">💴 乳価</div>'
+      +'<div style="background:#f5f7f5;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;align-items:center;">'
+      +'<span style="font-size:12px;font-weight:700;color:var(--green2);">適用年月</span>'
+      +'<select id="mp_year" style="flex:1;padding:8px;font-size:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;background:#fff;">'+yearOpts+'</select>'
+      +'<select id="mp_month" style="flex:1;padding:8px;font-size:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;background:#fff;">'+monthOpts+'</select>'
+      +'</div>'
+      +'<div class="field"><label>乳脂肪単価 (円/kg)</label><input type="number" id="mp_fat" step="0.01" placeholder="例: 120.50" oninput="calcProd()"></div>'
+      +'<div class="field"><label>無脂肪固形分単価 (円/kg)</label><input type="number" id="mp_snf" step="0.01" placeholder="例: 95.00" oninput="calcProd()"></div>'
+      +'<div class="field"><label>補給金 (円/月)</label><input type="number" id="mp_subsidy" step="1" placeholder="例: 150000" oninput="calcProd()"></div>'
+      +'<div class="field"><label>乳質乳代 (円/kg)</label><input type="number" id="mp_quality" step="0.01" placeholder="例: 5.50" oninput="calcProd()"></div>'
+
+      // --- 自動計算 ---
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;margin-top:14px;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--green2);margin-bottom:10px;">自動計算</div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:7px;">'
+      +'<span style="font-size:13px;color:var(--text2);">出荷乳量合計 (kg) <span style="font-size:11px;">×1.03</span></span>'
+      +'<span id="prod_milk_kg_disp" style="font-size:15px;font-weight:700;color:var(--green);">—</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:7px;">'
+      +'<span style="font-size:13px;color:var(--text2);">平均出荷乳量 <span style="font-size:11px;">(kg÷頭数)</span></span>'
+      +'<span id="prod_avg_disp" style="font-size:15px;font-weight:700;color:var(--green);">—</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:7px;">'
+      +'<span style="font-size:13px;color:var(--text2);">F/P比 <span style="font-size:11px;">(脂肪/蛋白)</span></span>'
+      +'<span id="pf_ratio_display" style="font-size:15px;font-weight:700;">—</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:7px;">'
+      +'<span style="font-size:13px;color:var(--text2);">一頭当たり給餌量 <span style="font-size:11px;">(給餌量÷搾乳頭数)</span></span>'
+      +'<span id="prod_wo_disp" style="font-size:15px;font-weight:700;color:var(--green);">—</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;">'
+      +'<span style="font-size:13px;color:var(--text2);">実質乳価</span>'
+      +'<span id="prod_price_disp" style="font-size:15px;font-weight:700;color:var(--green);">—</span>'
+      +'</div>'
+      +'<div id="prod_price_note" style="font-size:11px;color:var(--text2);margin-top:4px;"></div>'
+      +'</div>'
+
+      +'<button class="save-btn" id="prodSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="prodSaveMsg"></div></div>';
+    document.getElementById("prodSaveBtn").onclick=saveProdRecord;
+    calcProd();
+    return;
+  }
+
+
+  if(page.custom==="silage"){
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">GS品質</div>'
+      +'<div class="field"><label>グラスの種類</label>'
+      +'<select id="silage_type"><option value="">選択</option><option>1番グラス</option><option>2番グラス</option><option>3番グラス</option></select></div>'
+      +'<div class="field"><label>草の種類</label>'
+      +'<select id="silage_grass"><option value="">選択</option><option>オーチャード</option><option>チモシー</option><option>オーチャード＋チモシー</option><option>オーチャード＋マメ科牧草</option><option>チモシー＋マメ科牧草</option></select></div>'
+      +'<div class="field"><label>貯蔵方法</label>'
+      +'<select id="silage_storage"><option value="">選択</option><option>バンカー</option><option>スタック</option><option>コンビラップ</option></select></div>'
+      +'<div class="field"><label>乾物率 (%)</label><input type="number" id="silage_dm" step="0.1" placeholder="例: 35.5"></div>'
+      +'<div class="field"><label>カビ <span style="font-size:11px;color:var(--text2);">（1:ほぼなし　2:上部のみ　3:散在）</span></label>'
+      +scoreChips("silage_mold",["1:ほぼなし","2:上部のみ","3:散在"])+'</div>'
+      +'<div class="field"><label>色</label>'
+      +'<select id="silage_color"><option value="">選択</option><option>1:オリーブ</option><option>2:褐色</option><option>3:黒褐色</option></select></div>'
+      +'<div class="field"><label>匂い <span style="font-size:11px;color:var(--text2);">（1〜5）</span></label>'
+      +scoreChips("silage_smell",["1:酸臭(乳酸)","2:アンモニア臭","3:酪酸臭"])+'</div>'
+      +'<button class="save-btn" id="silageSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="silageSaveMsg"></div></div>';
+    document.getElementById("silageSaveBtn").onclick=saveSilageRecord;
+    return;
+  }
+
+  // --- CS ---
+  if(page.custom==="silage_corn"){
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">CS品質</div>'
+      +'<div class="field"><label>貯蔵方法</label>'
+      +'<select id="corn_storage"><option value="">選択</option><option>バンカー</option><option>スタック</option><option>コンビラップ</option></select></div>'
+      +'<div class="field"><label>播種日</label><input type="date" id="corn_sowing" oninput="calcCornDays()"></div>'
+      +'<div class="field"><label>刈り取り日</label><input type="date" id="corn_harvest" oninput="calcCornDays()"></div>'
+      +'<div class="field"><label>開封日</label><input type="date" id="corn_open" oninput="calcCornDays()"></div>'
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--green2);margin-bottom:8px;">自動計算</div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+      +'<span style="font-size:13px;color:var(--text2);">生育日数 <span style="font-size:11px;">(播種→刈取)</span></span>'
+      +'<span id="corn_grow_days" style="font-size:14px;font-weight:700;color:var(--green);">—</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;">'
+      +'<span style="font-size:13px;color:var(--text2);">貯蔵日数 <span style="font-size:11px;">(刈取→開封)</span></span>'
+      +'<span id="corn_store_days" style="font-size:14px;font-weight:700;color:var(--green);">—</span>'
+      +'</div>'
+      +'</div>'
+      +'<div class="field"><label>乾物率 (%)</label><input type="number" id="corn_dm" step="0.1" placeholder="例: 32.0"></div>'
+      +'<div class="field"><label>カビ <span style="font-size:11px;color:var(--text2);">（1:ほぼなし　2:上部のみ　3:散在）</span></label>'
+      +scoreChips("corn_mold",["1:ほぼなし","2:上部のみ","3:散在"])+'</div>'
+      +'<div class="field"><label>色</label>'
+      +'<select id="corn_color"><option value="">選択</option><option>1:オリーブ</option><option>2:褐色</option><option>3:黒褐色</option></select></div>'
+      +'<div class="field"><label>匂い <span style="font-size:11px;color:var(--text2);">（1〜5）</span></label>'
+      +scoreChips("corn_smell",["1:酸臭(乳酸)","2:アンモニア臭","3:酪酸臭"])+'</div>'
+      +'<button class="save-btn" id="cornSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="cornSaveMsg"></div></div>';
+    document.getElementById("cornSaveBtn").onclick=saveCornRecord;
+    return;
+  }
+
+  // --- サイレージ在庫 ---
+  if(page.custom==="silage_stock"){
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">サイレージ在庫管理</div>'
+      +'<div class="field"><label>サイレージの種類</label>'
+      +'<select id="stock_type"><option value="">選択</option><option>1番グラス</option><option>2番グラス</option><option>3番グラス</option><option>CS</option></select></div>'
+      +'<div class="field"><label>在庫量 (t)</label><input type="number" id="stock_amount" step="0.1" placeholder="例: 120"></div>'
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--green2);margin-bottom:10px;">バンカーパネル管理</div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>総パネル数（枚）</label><input type="number" id="stock_panel_total" step="1" placeholder="例: 40"></div>'
+      +'<div class="field" style="margin-bottom:0;"><label>消費パネル数（枚）</label><input type="number" id="stock_panel_used" step="1" placeholder="例: 12"></div>'
+      +'</div>'
+      +'<div class="field"><label>備考</label><input type="text" id="stock_note" placeholder="任意"></div>'
+      +'<button class="save-btn" id="stockSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="stockSaveMsg"></div></div>';
+    document.getElementById("stockSaveBtn").onclick=saveStockRecord;
+    return;
+  }
+
+  // --- 製品価格 ---
+  if(page.custom==="feed_cost"){
+    const supplierOpts='<option value="">選択</option><option>MPアグロ</option><option>大正堂</option><option>丹波屋</option><option>嘉多山カルシウム</option><option value="other">その他</option>';
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">製品価格記録</div>'
+
+      // 脂肪酸カルシウム
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;">脂肪酸カルシウム</div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>価格 (円)</label><input type="number" id="fc_fat_ca_price" step="1" placeholder="例: 35000"></div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>注文先</label>'
+      +'<select id="fc_fat_ca_supplier" onchange="onSupplierChange(\'fc_fat_ca\')">'
+      +supplierOpts+'</select></div>'
+      +'<div class="field hidden" id="fc_fat_ca_other_wrap" style="margin-bottom:0;"><label>注文先（その他）</label><input type="text" id="fc_fat_ca_other" placeholder="注文先を入力"></div>'
+      +'</div>'
+
+      // 重曹
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;">重曹</div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>価格 (円)</label><input type="number" id="fc_baking_price" step="1" placeholder="例: 8000"></div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>注文先</label>'
+      +'<select id="fc_baking_supplier" onchange="onSupplierChange(\'fc_baking\')">'
+      +supplierOpts+'</select></div>'
+      +'<div class="field hidden" id="fc_baking_other_wrap" style="margin-bottom:0;"><label>注文先（その他）</label><input type="text" id="fc_baking_other" placeholder="注文先を入力"></div>'
+      +'</div>'
+
+      // パルミチン酸製剤
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;">パルミチン酸製剤</div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>価格 (円)</label><input type="number" id="fc_palm_price" step="1" placeholder="例: 42000"></div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>注文先</label>'
+      +'<select id="fc_palm_supplier" onchange="onSupplierChange(\'fc_palm\')">'
+      +supplierOpts+'</select></div>'
+      +'<div class="field hidden" id="fc_palm_other_wrap" style="margin-bottom:0;"><label>注文先（その他）</label><input type="text" id="fc_palm_other" placeholder="注文先を入力"></div>'
+      +'</div>'
+
+      // 2次発酵防止剤
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--green2);margin-bottom:10px;">2次発酵防止剤</div>'
+      +'<div class="field" style="margin-bottom:8px;"><label>製品名</label>'
+      +'<select id="fc_antiferment_name"><option value="">選択</option><option>蟻酸アンモニウム</option><option>マスタードシード</option><option>プロピオン酸カルシウム</option><option>TMRメイト</option></select></div>'
+      +'<div class="field" style="margin-bottom:0;"><label>価格 (円)</label><input type="number" id="fc_antiferment_price" step="1" placeholder="例: 15000"></div>'
+      +'</div>'
+
+      +'<button class="save-btn" id="feedCostSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="feedCostSaveMsg"></div></div>';
+    document.getElementById("feedCostSaveBtn").onclick=saveFeedCostRecord;
+    return;
+  }
+
+  // --- 糞便検査 ---
+  if(page.custom==="feces"){
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">糞便検査</div>'
+      +'<div class="field"><label>糞団子 <span style="font-size:11px;color:var(--text2);">1:なし　2:1〜3個　3:4個以上</span></label>'
+      +scoreChips("feces_ball",["1:なし","2:1〜3","3:4以上"])+'</div>'
+      +'<div class="field"><label>粘液 <span style="font-size:11px;color:var(--text2);">1:なし　2:少量　3:多い</span></label>'
+      +scoreChips("feces_mucus",["1:なし","2:少量","3:多い"])+'</div>'
+      +'<div class="field"><label>偽膜 <span style="font-size:11px;color:var(--text2);">1:なし　2:1〜3個　3:4個以上</span></label>'
+      +scoreChips("feces_pseudomembrane",["1:なし","2:1〜3","3:4以上"])+'</div>'
+      +'<div class="field"><label>未消化の実 <span style="font-size:11px;color:var(--text2);">1:なし　2:1〜5粒　3:6粒以上</span></label>'
+      +scoreChips("feces_undigested",["1:なし","2:1〜5","3:6以上"])+'</div>'
+      +'<div class="field"><label>メモ</label><input type="text" id="feces_memo" placeholder="任意"></div>'
+      +'<button class="save-btn" id="fecesSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="fecesSaveMsg"></div></div>';
+    document.getElementById("fecesSaveBtn").onclick=saveFecesRecord;
+    return;
+  }
+
+  // --- PSPS ---
+  if(page.custom==="pssb"){
+    el.innerHTML='<div class="card">'
+      +'<div class="card-title">PSPS</div>'
+      +'<div style="font-size:12px;color:var(--text2);margin-bottom:14px;">各部位のスコアを入力してください（頭数）</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +'<div class="field" style="margin:0;"><label>TOP</label><input type="number" id="pssb_top" step="1" min="0" placeholder="0" oninput="calcPSPS()"></div>'
+      +'<div class="field" style="margin:0;"><label>MID1</label><input type="number" id="pssb_mid1" step="1" min="0" placeholder="0" oninput="calcPSPS()"></div>'
+      +'<div class="field" style="margin:0;"><label>MID2</label><input type="number" id="pssb_mid2" step="1" min="0" placeholder="0" oninput="calcPSPS()"></div>'
+      +'<div class="field" style="margin:0;"><label>BOTTOM</label><input type="number" id="pssb_bottom" step="1" min="0" placeholder="0" oninput="calcPSPS()"></div>'
+      +'</div>'
+      +'<div style="background:var(--green-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--green2);">合計頭数</span>'
+      +'<span id="pssb_total" style="font-size:20px;font-weight:700;color:var(--green);">0</span>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--green2);margin-bottom:6px;">各部位の割合</div>'
+      +'<div id="pssb_pct_display" style="font-size:13px;color:var(--text2);">—</div>'
+      +'</div>'
+      +'<div class="field"><label>メモ</label><input type="text" id="pssb_memo" placeholder="任意"></div>'
+      +'<button class="save-btn" id="pssbSaveBtn">保存</button>'
+      +'<div class="save-msg hidden" id="pssbSaveMsg"></div></div>';
+    document.getElementById("pssbSaveBtn").onclick=savePssbRecord;
+    calcPSPS();
+    return;
+  }
+
+  // --- Generic ---
+  let html='<div class="card"><div class="card-title">'+page.label+'</div>';
+  page.fields.forEach(f=>{
+    const unitHtml=f.unit?'<span class="unit">('+f.unit+')</span>':'';
+    html+='<div class="field"><label>'+f.label+unitHtml+'</label>';
+    if(f.type==="textarea") html+='<textarea id="'+f.id+'" placeholder="'+(f.placeholder||'')+'"></textarea>';
+    else html+='<input type="'+f.type+'" id="'+f.id+'" step="'+(f.step||'any')+'" placeholder="'+(f.placeholder||'')+'">';
+    html+='</div>';
+  });
+  html+='<button class="save-btn" id="genericSaveBtn">保存</button><div class="save-msg hidden" id="genericSaveMsg"></div></div>';
+  el.innerHTML=html;
+  document.getElementById("genericSaveBtn").onclick=()=>saveGenericRecord(page);
+}
+
+window.calcCornDays=function(){
+  const s=document.getElementById("corn_sowing")?.value;
+  const h=document.getElementById("corn_harvest")?.value;
+  const o=document.getElementById("corn_open")?.value;
+  const growEl=document.getElementById("corn_grow_days");
+  const storeEl=document.getElementById("corn_store_days");
+  if(growEl&&s&&h){
+    const diff=Math.round((new Date(h)-new Date(s))/86400000);
+    growEl.textContent=diff>=0?diff+"日":"—";
+  } else if(growEl) growEl.textContent="—";
+  if(storeEl&&h&&o){
+    const diff=Math.round((new Date(o)-new Date(h))/86400000);
+    storeEl.textContent=diff>=0?diff+"日":"—";
+  } else if(storeEl) storeEl.textContent="—";
+};
+
+function saveSilageRecord(){
+  const type=document.getElementById("silage_type").value;
+  if(!type){showMsg("silageSaveMsg","グラスの種類を選択してください",true);return;}
+  const data={
+    category:"grass", type,
+    grass:document.getElementById("silage_grass").value,
+    storage:document.getElementById("silage_storage").value,
+    dm:document.getElementById("silage_dm").value,
+    mold:document.getElementById("silage_mold").value,
+    color:document.getElementById("silage_color").value,
+    smell:document.getElementById("silage_smell").value,
+  };
+  pushRecord("silage",data);showMsg("silageSaveMsg","保存しました");
+  ["silage_type","silage_grass","silage_storage","silage_dm","silage_mold","silage_color","silage_smell"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  document.querySelectorAll('#chips_silage_mold .score-chip,#chips_silage_smell .score-chip').forEach(c=>c.classList.remove('selected'));
+}
+
+function saveCornRecord(){
+  const s=document.getElementById("corn_sowing").value;
+  const h=document.getElementById("corn_harvest").value;
+  const o=document.getElementById("corn_open").value;
+  const growDays=(s&&h)?Math.round((new Date(h)-new Date(s))/86400000)+"日":"";
+  const storeDays=(h&&o)?Math.round((new Date(o)-new Date(h))/86400000)+"日":"";
+  const data={
+    category:"corn",
+    storage:document.getElementById("corn_storage").value,
+    sowing:s, harvest:h, open:o,
+    grow_days:growDays, store_days:storeDays,
+    dm:document.getElementById("corn_dm").value,
+    mold:document.getElementById("corn_mold").value,
+    color:document.getElementById("corn_color").value,
+    smell:document.getElementById("corn_smell").value,
+  };
+  if(!data.dm&&!data.mold&&!data.smell&&!data.sowing){showMsg("cornSaveMsg","少なくとも1つ入力してください",true);return;}
+  pushRecord("silage_corn",data);showMsg("cornSaveMsg","保存しました");
+  ["corn_storage","corn_sowing","corn_harvest","corn_open","corn_dm","corn_mold","corn_color","corn_smell"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  document.querySelectorAll('#chips_corn_mold .score-chip,#chips_corn_smell .score-chip').forEach(c=>c.classList.remove('selected'));
+  calcCornDays();
+}
+
+
+function updatePhDisplay(){
+  const disp=document.getElementById("phNumDisplay"),marker=document.getElementById("phMarker"),lbl=document.getElementById("phRangeLabel"),tgt=document.getElementById("phTargetRange");
+  if(!disp)return;
+  disp.textContent=phVal.toFixed(1);disp.style.color=phColor(phVal);
+  const pct=((Math.max(5,Math.min(9,phVal))-5)/4)*100;
+  marker.style.left="calc("+pct+"% - 9px)";marker.style.border="2.5px solid "+phColor(phVal);
+  if(tgt){tgt.style.left=((PH_MIN-5)/4)*100+"%";tgt.style.width=((PH_MAX-PH_MIN)/4)*100+"%";}
+  if(lbl){const ok=phVal>=PH_MIN&&phVal<=PH_MAX;lbl.textContent=ok?"✓ 目標内":"▲ 目標外";lbl.style.color=ok?"var(--green3)":"var(--red)";}
+}
+function updateCowlist(){
+  const dl=document.getElementById("cowlist");if(!dl)return;
+  const cows=[...new Set(records.filter(r=>r.farm===currentFarm&&r.page==="ph").map(r=>r.data.cow))].sort();
+  dl.innerHTML=cows.map(c=>"<option value='"+c+"'>").join("");
+}
+
+function savePhRecord(){
+  const cow=document.getElementById("ph_cow").value.trim();
+  if(!cow){showMsg("phSaveMsg","牛の番号を入力してください",true);return;}
+  pushRecord("ph",{cow,ph:phVal,memo:document.getElementById("ph_memo").value.trim()});
+  showMsg("phSaveMsg","保存: "+cow+" / pH "+phVal.toFixed(1));
+  document.getElementById("ph_cow").value="";document.getElementById("ph_memo").value="";updateCowlist();
+}
+
+function saveStockRecord(){
+  const data={
+    type:document.getElementById("stock_type").value,
+    amount:document.getElementById("stock_amount").value,
+    panel_total:document.getElementById("stock_panel_total").value,
+    panel_used:document.getElementById("stock_panel_used").value,
+    note:document.getElementById("stock_note").value,
+  };
+  if(!data.type&&!data.amount&&!data.panel_total){showMsg("stockSaveMsg","少なくとも1つ入力してください",true);return;}
+  pushRecord("silage_stock",data);showMsg("stockSaveMsg","保存しました");
+  ["stock_type","stock_amount","stock_panel_total","stock_panel_used","stock_note"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+}
+
+window.onSupplierChange=function(prefix){
+  const val=document.getElementById(prefix+"_supplier").value;
+  document.getElementById(prefix+"_other_wrap").classList.toggle("hidden",val!=="other");
+};
+
+function saveFeedCostRecord(){
+  function supplierVal(prefix){
+    const sel=document.getElementById(prefix+"_supplier").value;
+    return sel==="other"?(document.getElementById(prefix+"_other").value||"その他"):sel;
+  }
+  const data={
+    fc_fat_ca_price:document.getElementById("fc_fat_ca_price").value,
+    fc_fat_ca_supplier:supplierVal("fc_fat_ca"),
+    fc_baking_price:document.getElementById("fc_baking_price").value,
+    fc_baking_supplier:supplierVal("fc_baking"),
+    fc_palm_price:document.getElementById("fc_palm_price").value,
+    fc_palm_supplier:supplierVal("fc_palm"),
+    fc_antiferment_name:document.getElementById("fc_antiferment_name").value,
+    fc_antiferment_price:document.getElementById("fc_antiferment_price").value,
+  };
+  const hasVal=Object.values(data).some(v=>v);
+  if(!hasVal){showMsg("feedCostSaveMsg","少なくとも1つ入力してください",true);return;}
+  pushRecord("feed_cost",data);showMsg("feedCostSaveMsg","保存しました");
+  ["fc_fat_ca_price","fc_fat_ca_supplier","fc_fat_ca_other","fc_baking_price","fc_baking_supplier","fc_baking_other","fc_palm_price","fc_palm_supplier","fc_palm_other","fc_antiferment_name","fc_antiferment_price"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  ["fc_fat_ca_other_wrap","fc_baking_other_wrap","fc_palm_other_wrap"].forEach(id=>document.getElementById(id)?.classList.add("hidden"));
+}
+
+window.calcPFRatio=function(){
+  const fat=parseFloat(document.getElementById("mc_fat")?.value);
+  const prot=parseFloat(document.getElementById("mc_protein")?.value);
+  const el=document.getElementById("pf_ratio_display");
+  if(!el)return;
+  if(fat>0&&prot>0){
+    const ratio=(fat/prot).toFixed(3);
+    el.textContent=ratio;
+    el.style.color=ratio>=1.0&&ratio<=1.5?"var(--green3)":"var(--red)";
+  } else {
+    el.textContent="—";el.style.color="var(--green)";
+  }
+};
+
+function saveMilkCompRecord(){
+  const fat=document.getElementById("mc_fat").value;
+  const prot=document.getElementById("mc_protein").value;
+  const snf=document.getElementById("mc_snf").value;
+  const mun=document.getElementById("mc_mun").value;
+  if(!fat&&!prot&&!snf&&!mun){showMsg("milkCompSaveMsg","少なくとも1つ入力してください",true);return;}
+  const pf=(parseFloat(fat)>0&&parseFloat(prot)>0)?(parseFloat(fat)/parseFloat(prot)).toFixed(3):"";
+  pushRecord("milk_comp",{mc_fat:fat,mc_protein:prot,mc_snf:snf,mc_mun:mun,fp_ratio:pf});
+  showMsg("milkCompSaveMsg","保存しました"+(pf?" / F/P比: "+pf:""));
+  ["mc_fat","mc_protein","mc_snf","mc_mun"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  calcPFRatio();
+}
+
+window.calcPSPS=function(){
+  const top=parseFloat(document.getElementById("pssb_top")?.value)||0;
+  const mid1=parseFloat(document.getElementById("pssb_mid1")?.value)||0;
+  const mid2=parseFloat(document.getElementById("pssb_mid2")?.value)||0;
+  const bot=parseFloat(document.getElementById("pssb_bottom")?.value)||0;
+  const total=top+mid1+mid2+bot;
+  const totalEl=document.getElementById("pssb_total");
+  const pctEl=document.getElementById("pssb_pct_display");
+  if(totalEl) totalEl.textContent=total;
+  if(pctEl){
+    if(total===0){pctEl.textContent="—";return;}
+    const pct=v=>Math.round(v/total*100);
+    pctEl.innerHTML='TOP: '+pct(top)+'%　MID1: '+pct(mid1)+'%　MID2: '+pct(mid2)+'%　BOTTOM: '+pct(bot)+'%';
+  }
+};
+
+function saveFecesRecord(){
+  const ball=document.getElementById("feces_ball").value;
+  const mucus=document.getElementById("feces_mucus").value;
+  const pseudo=document.getElementById("feces_pseudomembrane").value;
+  const undig=document.getElementById("feces_undigested").value;
+  if(!ball&&!mucus&&!pseudo&&!undig){showMsg("fecesSaveMsg","少なくとも1つ選択してください",true);return;}
+  pushRecord("feces",{ball,mucus,pseudomembrane:pseudo,undigested:undig,memo:document.getElementById("feces_memo").value});
+  showMsg("fecesSaveMsg","保存しました");
+  ["feces_ball","feces_mucus","feces_pseudomembrane","feces_undigested","feces_memo"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  document.querySelectorAll('#chips_feces_ball .score-chip,#chips_feces_mucus .score-chip,#chips_feces_pseudomembrane .score-chip,#chips_feces_undigested .score-chip').forEach(c=>c.classList.remove('selected'));
+}
+
+function savePssbRecord(){
+  const top=document.getElementById("pssb_top").value;
+  const mid1=document.getElementById("pssb_mid1").value;
+  const mid2=document.getElementById("pssb_mid2").value;
+  const bot=document.getElementById("pssb_bottom").value;
+  if(!top&&!mid1&&!mid2&&!bot){showMsg("pssbSaveMsg","少なくとも1つ入力してください",true);return;}
+  const t=(parseFloat(top)||0)+(parseFloat(mid1)||0)+(parseFloat(mid2)||0)+(parseFloat(bot)||0);
+  const pct=v=>t>0?Math.round((parseFloat(v)||0)/t*100):0;
+  pushRecord("pssb",{top,mid1,mid2,bottom:bot,total:t,
+    top_pct:pct(top),mid1_pct:pct(mid1),mid2_pct:pct(mid2),bottom_pct:pct(bot),
+    memo:document.getElementById("pssb_memo").value});
+  showMsg("pssbSaveMsg","保存しました");
+  ["pssb_top","pssb_mid1","pssb_mid2","pssb_bottom","pssb_memo"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  calcPSPS();
+}
+
+window.calcProd=function(){
+  const l1=parseFloat(document.getElementById("prod_milk_l1")?.value)||0;
+  const l2=parseFloat(document.getElementById("prod_milk_l2")?.value)||0;
+  const l3=parseFloat(document.getElementById("prod_milk_l3")?.value)||0;
+  const l=l1+l2+l3;
+  const totalLEl=document.getElementById("prod_milk_l_total");
+  if(totalLEl) totalLEl.textContent=l>0?l+" L":"—";
+  const shipped=parseFloat(document.getElementById("prod_shipped")?.value)||0;
+  const fat=parseFloat(document.getElementById("mc_fat")?.value)||0;
+  const prot=parseFloat(document.getElementById("mc_protein")?.value)||0;
+  const snf=parseFloat(document.getElementById("mc_snf")?.value)||0;
+  const fatPrice=parseFloat(document.getElementById("mp_fat")?.value)||0;
+  const snfPrice=parseFloat(document.getElementById("mp_snf")?.value)||0;
+  const subsidy=parseFloat(document.getElementById("mp_subsidy")?.value)||0;
+  const quality=parseFloat(document.getElementById("mp_quality")?.value)||0;
+  const feed=parseFloat(document.getElementById("prod_feed")?.value)||0;
+
+  const kgEl=document.getElementById("prod_milk_kg_disp");
+  const avgEl=document.getElementById("prod_avg_disp");
+  const fpEl=document.getElementById("pf_ratio_display");
+  const priceEl=document.getElementById("prod_price_disp");
+  const noteEl=document.getElementById("prod_price_note");
+  if(!kgEl)return;
+
+  const kg=l>0?Math.round(l*1.03*10)/10:0;
+  kgEl.textContent=kg>0?kg.toFixed(1)+" kg":"—";
+  avgEl.textContent=(kg>0&&shipped>0)?(kg/shipped).toFixed(1)+" kg/頭":"—";
+
+  const milking=parseFloat(document.getElementById("prod_milking")?.value)||0;
+
+  // 一頭当たり給餌量
+  const woEl=document.getElementById("prod_wo_disp");
+  if(woEl) woEl.textContent=(feed>0&&milking>0)?(feed/milking).toFixed(1)+" kg/頭":"—";
+
+  // F/P比
+  if(fat>0&&prot>0){
+    const fp=(fat/prot).toFixed(3);
+    fpEl.textContent=fp;
+    fpEl.style.color=parseFloat(fp)>=1.0&&parseFloat(fp)<=1.5?"var(--green3)":"var(--red)";
+  } else {fpEl.textContent="—";fpEl.style.color="var(--text2)";}
+
+  // 実質乳価
+  if(kg>0&&fat>0&&snf>0&&fatPrice>0&&snfPrice>0){
+    const total=(kg*fat/100*fatPrice)+(kg*snf/100*snfPrice);
+    const unitPrice=total/kg+subsidy+quality;
+    priceEl.textContent=unitPrice.toFixed(2)+" 円/kg";
+    noteEl.textContent="";
+  } else {
+    priceEl.textContent="—";
+    noteEl.textContent="乳量・乳成分・単価を入力してください";
+  }
+};
+
+function saveProdRecord(){
+  const l1=document.getElementById("prod_milk_l1").value;
+  const l2=document.getElementById("prod_milk_l2").value;
+  const l3=document.getElementById("prod_milk_l3").value;
+  const l=((parseFloat(l1)||0)+(parseFloat(l2)||0)+(parseFloat(l3)||0)).toString();
+  const milking=document.getElementById("prod_milking").value;
+  const shipped=document.getElementById("prod_shipped").value;
+  const mcFat=document.getElementById("mc_fat").value;
+  const mcProt=document.getElementById("mc_protein").value;
+  const mcSnf=document.getElementById("mc_snf").value;
+  const mcMun=document.getElementById("mc_mun").value;
+  const mpYear=document.getElementById("mp_year").value;
+  const mpMonth=document.getElementById("mp_month").value;
+  const mpFat=document.getElementById("mp_fat").value;
+  const mpSnf=document.getElementById("mp_snf").value;
+  const mpSubsidy=document.getElementById("mp_subsidy").value;
+  const mpQuality=document.getElementById("mp_quality").value;
+  const feed=document.getElementById("prod_feed").value;
+  const wo=(feed&&milking&&parseFloat(milking)>0)?(parseFloat(feed)/parseFloat(milking)).toFixed(1):"";
+
+  const hasAny=l||milking||shipped||mcFat||mcProt||mcSnf||mcMun||mpFat||mpSnf||mpSubsidy||feed;
+  if(!hasAny){showMsg("prodSaveMsg","少なくとも1つ入力してください",true);return;}
+
+  const kg=l?(Math.round(parseFloat(l)*1.03*10)/10).toString():"";
+  const avg=(kg&&shipped&&parseFloat(shipped)>0)?(parseFloat(kg)/parseFloat(shipped)).toFixed(1):"";
+  const fp=(mcFat&&mcProt&&parseFloat(mcProt)>0)?(parseFloat(mcFat)/parseFloat(mcProt)).toFixed(3):"";
+
+  let unitPrice="";
+  if(kg&&mcFat&&mcSnf&&mpFat&&mpSnf){
+    const kgN=parseFloat(kg);
+    const total=(kgN*parseFloat(mcFat)/100*parseFloat(mpFat))+(kgN*parseFloat(mcSnf)/100*parseFloat(mpSnf));
+    unitPrice=(total/kgN+(parseFloat(mpSubsidy)||0)+(parseFloat(mpQuality)||0)).toFixed(2);
+  }
+
+  pushRecord("production",{
+    prod_milk_l1:l1, prod_milk_l2:l2, prod_milk_l3:l3, prod_milk_l:l, prod_milk_kg:kg,
+    prod_milking:milking, prod_shipped:shipped, prod_avg:avg,
+    prod_feed:feed, prod_wo:wo,
+    mc_fat:mcFat, mc_protein:mcProt, mc_snf:mcSnf, mc_mun:mcMun, fp_ratio:fp,
+    mp_year:mpYear, mp_month:mpMonth, mp_fat:mpFat, mp_snf:mpSnf, mp_subsidy:mpSubsidy, mp_quality:mpQuality,
+    prod_unit_price:unitPrice
+  });
+
+  let msg="保存しました";
+  if(avg) msg+=" / 平均"+avg+"kg/頭";
+  if(wo) msg+=" / 一頭当たり給餌量:"+wo+"kg/頭";
+  if(fp) msg+=" / F/P:"+fp;
+  if(unitPrice) msg+=" / 乳価"+unitPrice+"円/kg";
+  showMsg("prodSaveMsg",msg);
+
+  ["prod_milk_l1","prod_milk_l2","prod_milk_l3","prod_milking","prod_shipped","prod_feed","mc_fat","mc_protein","mc_snf","mc_mun","mp_fat","mp_snf","mp_subsidy","mp_quality"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  calcProd();
+}
+
+function saveMilkPriceRecord(){
+  const fat=document.getElementById("mp_fat").value,snf=document.getElementById("mp_snf").value;
+  const subsidy=document.getElementById("mp_subsidy").value;
+  if(!fat&&!snf&&!subsidy){showMsg("mpSaveMsg","少なくとも1つ入力してください",true);return;}
+  const year=document.getElementById("mp_year").value,month=document.getElementById("mp_month").value;
+  pushRecord("milk_price",{year,month,mp_fat:fat,mp_snf:snf,mp_subsidy:subsidy});
+  showMsg("mpSaveMsg",year+"年"+month+"月の乳価を保存しました");
+  document.getElementById("mp_fat").value="";document.getElementById("mp_snf").value="";document.getElementById("mp_subsidy").value="";
+}
+
+function saveGenericRecord(page){
+  const data={};let hasValue=false;
+  page.fields.forEach(f=>{const e=document.getElementById(f.id);if(e){data[f.id]=e.value;if(e.value.trim())hasValue=true;}});
+  if(!hasValue){showMsg("genericSaveMsg","少なくとも1つ入力してください",true);return;}
+  pushRecord(page.id,data);showMsg("genericSaveMsg","保存しました");
+  page.fields.forEach(f=>{const e=document.getElementById(f.id);if(e)e.value="";});
+}
+
+function pushRecord(pageId,data){
+  records.push({id:Date.now().toString(),farm:currentFarm,date:document.getElementById("visitDate").value,page:pageId,data});
+  persist();
+}
+
+function showMsg(id,msg,isErr){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=msg;el.className="save-msg"+(isErr?" err-msg":"");
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.add("hidden"),3000);
+}
+
+// List view
+const LIST_PAGES = [
+  {id:"production",  label:"生産データ"},
+  {id:"silage",      label:"GS"},
+  {id:"silage_corn", label:"CS"},
+  {id:"ph",          label:"尿pH"},
+  {id:"feces",       label:"糞便検査"},
+  {id:"pssb",        label:"PSPS"},
+];
+let currentListPage = "production";
+
+function renderListNav(){
+  const nav=document.getElementById("listPageNav");
+  nav.innerHTML=LIST_PAGES.map(p=>'<button data-lp="'+p.id+'"'+(p.id===currentListPage?' class="active"':'')+'>'+p.label+'</button>').join("");
+  nav.querySelectorAll("button").forEach(btn=>{
+    btn.onclick=()=>{currentListPage=btn.dataset.lp;renderListNav();renderList();};
+  });
+  const active=nav.querySelector(".active");
+  if(active)active.scrollIntoView({inline:"center",behavior:"smooth"});
+}
+
+function renderList(){
+  const el=document.getElementById("listContent");
+  const fr=records.filter(r=>r.farm===currentFarm&&r.page===currentListPage).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!fr.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text2);">まだ記録がありません</div>';
+    return;
+  }
+  let html="";
+  fr.forEach(r=>{
+    const {label,s}=recSummary(r);
+    html+='<div style="margin:10px 12px 0;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px;">'+r.date+'</div>'
+      +'<div class="record-item" style="margin:0;">'
+      +'<div style="flex:1"><div class="rec-content">'+(s||"（内容なし）")+'</div></div>'
+      +'<button class="del-btn" onclick="deleteRecord(\''+r.id+'\')">削除</button>'
+      +'</div></div>';
+  });
+  el.innerHTML=html;
+}
+window.deleteRecord=function(id){records=records.filter(r=>r.id!==id);persist();renderList();};
+
+function recSummary(r){
+  const page=PAGES.find(p=>p.id===r.page);
+  const label=page?page.label:r.page;
+  let s="";
+  if(r.page==="ph") s=r.data.cow+" / pH "+Number(r.data.ph).toFixed(1)+(r.data.memo?" / "+r.data.memo:"");
+  else if(r.page==="silage"){
+    const p=[];
+    if(r.data.type)p.push(r.data.type);if(r.data.grass)p.push(r.data.grass);if(r.data.storage)p.push(r.data.storage);
+    if(r.data.dm)p.push("乾物"+r.data.dm+"%");if(r.data.mold)p.push("カビ:"+r.data.mold);
+    if(r.data.smell)p.push("匂い:"+r.data.smell);if(r.data.color)p.push(r.data.color);
+    s=p.join(" / ");
+  }
+  else if(r.page==="silage_corn"){
+    const p=[];const d=r.data;
+    if(d.storage)p.push(d.storage);if(d.dm)p.push("乾物"+d.dm+"%");
+    if(d.sowing&&d.harvest)p.push("生育"+d.grow_days);
+    if(d.harvest&&d.open)p.push("貯蔵"+d.store_days);
+    if(d.mold)p.push("カビ:"+d.mold);if(d.smell)p.push("匂い:"+d.smell);if(d.color)p.push(d.color);
+    s=p.join(" / ");
+  }
+  else if(r.page==="silage_stock"){
+    const p=[];
+    if(r.data.type)p.push(r.data.type);if(r.data.amount)p.push("在庫"+r.data.amount+"t");
+    if(r.data.panel_total)p.push("パネル"+r.data.panel_used+"/"+r.data.panel_total+"枚");
+    s=p.join(" / ");
+  }
+  else if(r.page==="milk_price") s=r.data.year+"年"+r.data.month+"月"+(r.data.mp_fat?" 脂肪:"+r.data.mp_fat+"円":"")+(r.data.mp_snf?" 無脂固:"+r.data.mp_snf+"円":"");
+  else if(r.page==="feed_cost"){
+    const p=[];const d=r.data;
+    if(d.fc_fat_ca_price)p.push("脂肪酸Ca:"+d.fc_fat_ca_price+"円"+(d.fc_fat_ca_supplier?" ("+d.fc_fat_ca_supplier+")":""));
+    if(d.fc_baking_price)p.push("重曹:"+d.fc_baking_price+"円"+(d.fc_baking_supplier?" ("+d.fc_baking_supplier+")":""));
+    if(d.fc_palm_price)p.push("パルミチン酸:"+d.fc_palm_price+"円"+(d.fc_palm_supplier?" ("+d.fc_palm_supplier+")":""));
+    if(d.fc_antiferment_price)p.push((d.fc_antiferment_name||"発酵防止剤")+":"+d.fc_antiferment_price+"円");
+    s=p.join(" / ");
+  }
+  else if(r.page==="feces"){
+    const p=[];const d=r.data;
+    if(d.ball)p.push("糞団子:"+d.ball);if(d.mucus)p.push("粘液:"+d.mucus);
+    if(d.pseudomembrane)p.push("偽膜:"+d.pseudomembrane);if(d.undigested)p.push("未消化:"+d.undigested);
+    if(d.memo)p.push(d.memo);s=p.join(" / ");
+  }
+  else if(r.page==="pssb"){
+    const d=r.data;
+    s="TOP:"+d.top+" MID1:"+d.mid1+" MID2:"+d.mid2+" BOT:"+d.bottom+" 合計:"+d.total+"頭"
+      +" (TOP:"+d.top_pct+"% MID1:"+d.mid1_pct+"% MID2:"+d.mid2_pct+"% BOT:"+d.bottom_pct+"%)";
+  }
+  else if(r.page==="production"){const d=r.data;const p=[];
+    if(d.prod_milk_l)p.push("出荷合計"+d.prod_milk_l+"L→"+d.prod_milk_kg+"kg");
+    if(d.prod_milking)p.push("搾乳"+d.prod_milking+"頭");
+    if(d.prod_shipped)p.push("出荷"+d.prod_shipped+"頭");
+    if(d.prod_avg)p.push("平均"+d.prod_avg+"kg/頭");
+    if(d.prod_feed)p.push("給餌"+d.prod_feed+"kg");
+    if(d.prod_wo)p.push("一頭当たり給餌量:"+d.prod_wo+"kg/頭");
+    if(d.mc_fat)p.push("脂肪"+d.mc_fat+"%");
+    if(d.mc_protein)p.push("蛋白"+d.mc_protein+"%");
+    if(d.fp_ratio)p.push("F/P:"+d.fp_ratio);
+    if(d.prod_unit_price)p.push("乳価"+d.prod_unit_price+"円/kg");
+    s=p.join(" / ");
+  }
+  else if(page&&page.fields) s=Object.entries(r.data).filter(([k,v])=>v).map(([k,v])=>{const f=page.fields.find(f=>f.id===k);return (f?f.label:k)+": "+v+(f&&f.unit?" "+f.unit:"");}).join(" / ");
+  return {label,s};
+}
+
+// CSV Export
+document.getElementById("csvExportBtn").onclick=function(){
+  const fr=records.filter(r=>r.farm===currentFarm).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!fr.length){alert("エクスポートできる記録がありません");return;}
+
+  // 数値データのみ抽出
+  const rows=[];
+  fr.forEach(r=>{
+    const base={農場:r.farm,日付:r.date,種別:PAGES.find(p=>p.id===r.page)?.label||r.page};
+    const d=r.data;
+    if(r.page==="ph") rows.push({...base,牛番号:d.cow||"",pH:d.ph||"",メモ:d.memo||""});
+    else if(r.page==="silage") rows.push({...base,グラス種類:d.type||"",草の種類:d.grass||"",貯蔵:d.storage||"",乾物率_pct:d.dm||"",カビ_1to3:d.mold||"",色:d.color||"",匂い_1to5:d.smell||""});
+    else if(r.page==="silage_corn") rows.push({...base,貯蔵:d.storage||"",播種日:d.sowing||"",刈取日:d.harvest||"",開封日:d.open||"",生育日数:d.grow_days||"",貯蔵日数:d.store_days||"",乾物率_pct:d.dm||"",カビ_1to3:d.mold||"",色:d.color||"",匂い_1to3:d.smell||""});
+    else if(r.page==="silage_stock") rows.push({...base,種類:d.type||"",在庫_t:d.amount||"",総パネル:d.panel_total||"",消費パネル:d.panel_used||"",備考:d.note||""});
+    else if(r.page==="milk_comp") rows.push({...base,乳脂肪率_pct:d.mc_fat||"",乳蛋白質率_pct:d.mc_protein||"",無脂固形分率_pct:d.mc_snf||"",MUN_mgdL:d.mc_mun||"",FP比:d.fp_ratio||""});
+    else if(r.page==="milk_price") rows.push({...base,年:d.year||"",月:d.month||"",乳脂肪単価_円kg:d.mp_fat||"",無脂肪固形分単価_円kg:d.mp_snf||"",補給金_円:d.mp_subsidy||""});
+    else if(r.page==="milk_comp") rows.push({...base,乳脂肪率_pct:d.mc_fat||"",乳蛋白質率_pct:d.mc_protein||"",無脂固形分率_pct:d.mc_snf||"",MUN_mgdL:d.mc_mun||"",FP比:d.fp_ratio||""});
+    else if(r.page==="production") rows.push({...base,出荷乳量1_L:d.prod_milk_l1||"",出荷乳量2_L:d.prod_milk_l2||"",出荷乳量3_L:d.prod_milk_l3||"",出荷乳量合計_L:d.prod_milk_l||"",出荷乳量合計_kg:d.prod_milk_kg||"",搾乳頭数_頭:d.prod_milking||"",出荷頭数_頭:d.prod_shipped||"",平均出荷乳量_kg頭:d.prod_avg||"",給餌量_kg日:d.prod_feed||"",一頭当たり給餌量_kg頭:d.prod_wo||"",乳脂肪率_pct:d.mc_fat||"",乳蛋白質率_pct:d.mc_protein||"",無脂固形分率_pct:d.mc_snf||"",MUN_mgdL:d.mc_mun||"",FP比:d.fp_ratio||"",乳脂肪単価_円kg:d.mp_fat||"",無脂固形分単価_円kg:d.mp_snf||"",補給金_円:d.mp_subsidy||"",乳質乳代_円kg:d.mp_quality||"",実質乳価_円kg:d.prod_unit_price||""});
+    else if(r.page==="feed") rows.push({...base,変更内容:d.feed_change||"",給餌量_kg頭日:d.feed_amount||""});
+    else if(r.page==="issue") rows.push({...base,課題内容:d.issue_text||""});
+    else if(r.page==="feed_cost") rows.push({...base,脂肪酸Ca価格_円:d.fc_fat_ca_price||"",脂肪酸Ca注文先:d.fc_fat_ca_supplier||"",重曹価格_円:d.fc_baking_price||"",重曹注文先:d.fc_baking_supplier||"",パルミチン酸価格_円:d.fc_palm_price||"",パルミチン酸注文先:d.fc_palm_supplier||"",発酵防止剤名:d.fc_antiferment_name||"",発酵防止剤価格_円:d.fc_antiferment_price||""});
+    else if(r.page==="feces") rows.push({...base,糞団子_1to3:d.ball||"",粘液_1to3:d.mucus||"",偽膜_1to3:d.pseudomembrane||"",未消化_1to3:d.undigested||"",メモ:d.memo||""});
+    else if(r.page==="pssb") rows.push({...base,TOP:d.top||"",MID1:d.mid1||"",MID2:d.mid2||"",BOTTOM:d.bottom||"",合計:d.total||"",TOP_pct:d.top_pct||"",MID1_pct:d.mid1_pct||"",MID2_pct:d.mid2_pct||"",BOTTOM_pct:d.bottom_pct||"",メモ:d.memo||""});
+  });
+
+  if(!rows.length){alert("データがありません");return;}
+  const keys=Object.keys(rows[0]);
+  const bom="\uFEFF";
+  const csv=bom+keys.join(",")+"\n"+rows.map(r=>keys.map(k=>'"'+(r[k]||"").toString().replace(/"/g,'""')+'"').join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="酪農記録_"+currentFarm+"_"+todayStr()+".csv";
+  a.click();
+};
+
+// Chart CSV export
+document.getElementById("chartCsvExportBtn").onclick=function(){
+  const fr=records.filter(r=>r.farm===currentFarm);
+  let rows=[];
+
+  if(currentChartPage==="ph"){
+    const byDate={};
+    fr.filter(r=>r.page==="ph").forEach(r=>{if(!byDate[r.date])byDate[r.date]=[];byDate[r.date].push(Number(r.data.ph));});
+    rows=Object.entries(byDate).sort(([a],[b])=>a.localeCompare(b)).map(([date,vals])=>({日付:date,尿pH平均:(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2),測定頭数:vals.length}));
+  }
+  else if(currentChartPage==="silage"){
+    rows=fr.filter(r=>r.page==="silage").sort((a,b)=>a.date.localeCompare(b.date)).map(r=>({日付:r.date,種類:r.data.type||"",草の種類:r.data.grass||"",貯蔵:r.data.storage||"",乾物率_pct:r.data.dm||"",カビ:r.data.mold||"",色:r.data.color||"",匂い:r.data.smell||""}));
+  }
+  else if(currentChartPage==="silage_corn"){
+    rows=fr.filter(r=>r.page==="silage_corn").sort((a,b)=>a.date.localeCompare(b.date)).map(r=>({日付:r.date,貯蔵:r.data.storage||"",播種日:r.data.sowing||"",刈取日:r.data.harvest||"",開封日:r.data.open||"",生育日数:r.data.grow_days||"",貯蔵日数:r.data.store_days||"",乾物率_pct:r.data.dm||"",カビ:r.data.mold||"",色:r.data.color||"",匂い:r.data.smell||""}));
+  }
+  else if(currentChartPage==="production"){
+    rows=fr.filter(r=>r.page==="production").sort((a,b)=>a.date.localeCompare(b.date)).map(r=>({日付:r.date,出荷乳量1_L:r.data.prod_milk_l1||"",出荷乳量2_L:r.data.prod_milk_l2||"",出荷乳量3_L:r.data.prod_milk_l3||"",出荷乳量合計_L:r.data.prod_milk_l||"",出荷乳量合計_kg:r.data.prod_milk_kg||"",搾乳頭数:r.data.prod_milking||"",出荷頭数:r.data.prod_shipped||"",平均出荷乳量_kg頭:r.data.prod_avg||"",給餌量_kg日:r.data.prod_feed||"",一頭当たり給餌量_kg頭:r.data.prod_wo||"",乳脂肪率_pct:r.data.mc_fat||"",乳蛋白質率_pct:r.data.mc_protein||"",無脂固形分率_pct:r.data.mc_snf||"",MUN_mgdL:r.data.mc_mun||"",FP比:r.data.fp_ratio||"",乳脂肪単価_円kg:r.data.mp_fat||"",無脂固形分単価_円kg:r.data.mp_snf||"",補給金_円:r.data.mp_subsidy||"",乳質乳代_円kg:r.data.mp_quality||"",実質乳価_円kg:r.data.prod_unit_price||""}));
+  }
+  else if(currentChartPage==="feces"){
+    rows=fr.filter(r=>r.page==="feces").sort((a,b)=>a.date.localeCompare(b.date)).map(r=>({日付:r.date,糞団子_1to3:r.data.ball||"",粘液_1to3:r.data.mucus||"",偽膜_1to3:r.data.pseudomembrane||"",未消化_1to3:r.data.undigested||"",メモ:r.data.memo||""}));
+  }
+  else if(currentChartPage==="pssb"){
+    rows=fr.filter(r=>r.page==="pssb").sort((a,b)=>a.date.localeCompare(b.date)).map(r=>({日付:r.date,TOP頭数:r.data.top||"",MID1頭数:r.data.mid1||"",MID2頭数:r.data.mid2||"",BOTTOM頭数:r.data.bottom||"",合計頭数:r.data.total||"",TOP_pct:r.data.top_pct||"",MID1_pct:r.data.mid1_pct||"",MID2_pct:r.data.mid2_pct||"",BOTTOM_pct:r.data.bottom_pct||""}));
+  }
+
+  if(!rows.length){alert("エクスポートできるデータがありません");return;}
+  const keys=Object.keys(rows[0]);
+  const bom="\uFEFF";
+  const csv=bom+keys.join(",")+"\n"+rows.map(r=>keys.map(k=>'"'+(r[k]||"").toString().replace(/"/g,'""')+'"').join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  const pageLabel=CHART_PAGES.find(p=>p.id===currentChartPage)?.label||currentChartPage;
+  a.download="グラフデータ_"+currentFarm+"_"+pageLabel+"_"+todayStr()+".csv";
+  a.click();
+};
+
+// Chart helpers
+function makeChart(data,yMin,yMax,color,refMin,refMax,unit){
+  if(!data||!data.length)return '<div class="chart-empty">データがありません</div>';
+  const W=340,H=170,PL=40,PR=10,PT=8,PB=24,cw=W-PL-PR,ch=H-PT-PB;
+  const dates=data.map(d=>new Date(d.date).getTime());
+  const minT=Math.min(...dates),maxT=Math.max(...dates),rangeT=maxT-minT||1;
+  const tx=t=>PL+((t-minT)/rangeT)*cw;
+  const ty=v=>PT+ch-((v-yMin)/(yMax-yMin||1))*ch;
+  let svg='<svg width="100%" viewBox="0 0 '+W+' '+H+'" style="display:block;overflow:visible">';
+  for(let i=0;i<=4;i++){const v=yMin+i*(yMax-yMin)/4;svg+='<line x1="'+PL+'" y1="'+ty(v)+'" x2="'+(W-PR)+'" y2="'+ty(v)+'" stroke="#E8EDEA" stroke-width="1"/><text x="'+(PL-4)+'" y="'+(ty(v)+4)+'" text-anchor="end" font-size="9" fill="#8AA898">'+(v%1===0?v:v.toFixed(1))+'</text>';}
+  if(refMin!=null&&refMax!=null)svg+='<rect x="'+PL+'" y="'+ty(refMax)+'" width="'+cw+'" height="'+Math.abs(ty(refMin)-ty(refMax))+'" fill="'+color+'" fill-opacity="0.15"/>';
+  const ud=[...new Set(data.map(d=>d.date))].sort();
+  const step=Math.max(1,Math.ceil(ud.length/5));
+  ud.filter((_,i)=>i%step===0||i===ud.length-1).forEach(d=>{const t=new Date(d).getTime();const p=d.split("-");svg+='<text x="'+tx(t)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#8AA898">'+Number(p[1])+'/'+Number(p[2])+'</text>';});
+  const sorted=[...data].sort((a,b)=>a.date.localeCompare(b.date));
+  if(sorted.length>1){svg+='<polyline points="'+sorted.map(d=>tx(new Date(d.date).getTime())+","+ty(d.value)).join(" ")+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round"/>';}
+  sorted.forEach(d=>{svg+='<circle cx="'+tx(new Date(d.date).getTime())+'" cy="'+ty(d.value)+'" r="4" fill="'+color+'" stroke="#fff" stroke-width="1.5"><title>'+d.date+': '+d.value+(unit||'')+'</title></circle>';});
+  svg+='</svg>';return svg;
+}
+
+function makeYmChart(data,color,unit){
+  if(!data||!data.length)return '<div class="chart-empty">データがありません</div>';
+  const sorted=[...data].sort((a,b)=>a.ym.localeCompare(b.ym));
+  const W=340,H=170,PL=46,PR=10,PT=8,PB=24,cw=W-PL-PR,ch=H-PT-PB;
+  const vals=sorted.map(d=>d.value);
+  const yMin=Math.floor(Math.min(...vals)*0.97/10)*10,yMax=Math.ceil(Math.max(...vals)*1.03/10)*10;
+  const n=sorted.length;
+  const ty=v=>PT+ch-((v-yMin)/(yMax-yMin||1))*ch;
+  const tx=i=>PL+(n===1?cw/2:i/(n-1)*cw);
+  let svg='<svg width="100%" viewBox="0 0 '+W+' '+H+'" style="display:block;overflow:visible">';
+  for(let i=0;i<=4;i++){const v=yMin+i*(yMax-yMin)/4;svg+='<line x1="'+PL+'" y1="'+ty(v)+'" x2="'+(W-PR)+'" y2="'+ty(v)+'" stroke="#E8EDEA" stroke-width="1"/><text x="'+(PL-4)+'" y="'+(ty(v)+4)+'" text-anchor="end" font-size="9" fill="#8AA898">'+Math.round(v)+'</text>';}
+  if(sorted.length>1)svg+='<polyline points="'+sorted.map((d,i)=>tx(i)+","+ty(d.value)).join(" ")+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round"/>';
+  sorted.forEach((d,i)=>{const ym=d.ym.split("-");svg+='<circle cx="'+tx(i)+'" cy="'+ty(d.value)+'" r="4" fill="'+color+'" stroke="#fff" stroke-width="1.5"><title>'+ym[0]+'年'+Number(ym[1])+'月: '+d.value+(unit||'')+'</title></circle><text x="'+tx(i)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#8AA898">'+ym[0].slice(2)+'/'+Number(ym[1])+'</text>';});
+  svg+='</svg>';return svg;
+}
+
+// Chart page nav
+const CHART_PAGES = [
+  {id:"ph",          label:"尿pH"},
+  {id:"silage",      label:"GS"},
+  {id:"silage_corn", label:"CS"},
+  {id:"production",  label:"生産データ"},
+  {id:"feces",       label:"糞便"},
+  {id:"pssb",        label:"PSPS"},
+];
+let currentChartPage = "ph";
+
+function renderChartNav(){
+  const nav=document.getElementById("chartPageNav");
+  nav.innerHTML=CHART_PAGES.map(p=>'<button data-cp="'+p.id+'"'+(p.id===currentChartPage?' class="active"':'')+'>'+p.label+'</button>').join("");
+  nav.querySelectorAll("button").forEach(btn=>{
+    btn.onclick=()=>{currentChartPage=btn.dataset.cp;renderChartNav();renderChart();};
+  });
+  const active=nav.querySelector(".active");
+  if(active)active.scrollIntoView({inline:"center",behavior:"smooth"});
+}
+
+function renderChart(){
+  const el=document.getElementById("chartContent");
+  const fr=records.filter(r=>r.farm===currentFarm);
+  let html="";
+
+  if(currentChartPage==="ph"){
+    const phByDate={};
+    fr.filter(r=>r.page==="ph").forEach(r=>{if(!phByDate[r.date])phByDate[r.date]=[];phByDate[r.date].push(Number(r.data.ph));});
+    const phData=Object.entries(phByDate).map(([date,vals])=>({date,value:vals.reduce((a,b)=>a+b,0)/vals.length}));
+    html+='<div class="chart-card"><h3>尿pH（日平均）</h3>'+makeChart(phData,5,9,"#2D6B4A",PH_MIN,PH_MAX,"")+'<div class="chart-note">帯 = 目標範囲 '+PH_MIN+'–'+PH_MAX+'</div></div>';
+  }
+
+  else if(currentChartPage==="silage"){
+    const slg=fr.filter(r=>r.page==="silage");
+    const dmData=slg.filter(r=>r.data.dm).map(r=>({date:r.date,value:parseFloat(r.data.dm),label:r.data.type||""}));
+    const moldData=slg.filter(r=>r.data.mold).map(r=>({date:r.date,value:parseFloat(r.data.mold)}));
+    const smellData=slg.filter(r=>r.data.smell).map(r=>({date:r.date,value:parseFloat(r.data.smell)}));
+    const colorData=slg.filter(r=>r.data.color).map(r=>({date:r.date,value:parseFloat(r.data.color)}));
+    html+='<div class="chart-card"><h3>GS 乾物率</h3>'+makeChart(dmData,20,50,"#3D8B60",30,40,"%")+'<div class="chart-note">帯 = 目安 30–40%</div></div>';
+    html+='<div class="chart-card"><h3>GS カビ（1〜3）</h3>'+makeChart(moldData,0.5,3.5,"#8B4513",null,null,"")+'<div class="chart-note">数値が低いほど良好</div></div>';
+    html+='<div class="chart-card"><h3>GS 匂い（1〜3）</h3>'+makeChart(smellData,0.5,3.5,"#7B52AB",null,null,"")+'<div class="chart-note">1:酸臭(乳酸) 2:アンモニア臭 3:酪酸臭</div></div>';
+    html+='<div class="chart-card"><h3>GS 色（1〜3）</h3>'+makeChart(colorData,0.5,3.5,"#3D8B60",null,null,"")+'<div class="chart-note">1:オリーブ 2:褐色 3:黒褐色</div></div>';
+  }
+
+  else if(currentChartPage==="silage_corn"){
+    const corn=fr.filter(r=>r.page==="silage_corn");
+    const dmData=corn.filter(r=>r.data.dm).map(r=>({date:r.date,value:parseFloat(r.data.dm)}));
+    const moldData=corn.filter(r=>r.data.mold).map(r=>({date:r.date,value:parseFloat(r.data.mold)}));
+    const smellData=corn.filter(r=>r.data.smell).map(r=>({date:r.date,value:parseFloat(r.data.smell)}));
+    const colorData=corn.filter(r=>r.data.color).map(r=>({date:r.date,value:parseFloat(r.data.color)}));
+    html+='<div class="chart-card"><h3>CS 乾物率</h3>'+makeChart(dmData,20,50,"#C17D2A",28,35,"%")+'<div class="chart-note">帯 = 目安 28–35%</div></div>';
+    html+='<div class="chart-card"><h3>CS カビ（1〜3）</h3>'+makeChart(moldData,0.5,3.5,"#8B4513",null,null,"")+'<div class="chart-note">数値が低いほど良好</div></div>';
+    html+='<div class="chart-card"><h3>CS 匂い（1〜3）</h3>'+makeChart(smellData,0.5,3.5,"#7B52AB",null,null,"")+'<div class="chart-note">1:酸臭(乳酸) 2:アンモニア臭 3:酪酸臭</div></div>';
+    html+='<div class="chart-card"><h3>CS 色（1〜3）</h3>'+makeChart(colorData,0.5,3.5,"#C17D2A",null,null,"")+'<div class="chart-note">1:オリーブ 2:褐色 3:黒褐色</div></div>';
+  }
+
+  else if(currentChartPage==="production"){
+    const prod=fr.filter(r=>r.page==="production");
+    const milkData=prod.filter(r=>r.data.prod_milk_kg).map(r=>({date:r.date,value:parseFloat(r.data.prod_milk_kg)}));
+    const milkingData=prod.filter(r=>r.data.prod_milking).map(r=>({date:r.date,value:parseFloat(r.data.prod_milking)}));
+    const shippedData=prod.filter(r=>r.data.prod_shipped).map(r=>({date:r.date,value:parseFloat(r.data.prod_shipped)}));
+    const avgData=prod.filter(r=>r.data.prod_avg).map(r=>({date:r.date,value:parseFloat(r.data.prod_avg)}));
+    const woData=prod.filter(r=>r.data.prod_wo).map(r=>({date:r.date,value:parseFloat(r.data.prod_wo)}));
+    const priceData=prod.filter(r=>r.data.prod_unit_price).map(r=>({date:r.date,value:parseFloat(r.data.prod_unit_price)}));
+    const fatData=prod.filter(r=>r.data.mc_fat).map(r=>({date:r.date,value:parseFloat(r.data.mc_fat)}));
+    const protData=prod.filter(r=>r.data.mc_protein).map(r=>({date:r.date,value:parseFloat(r.data.mc_protein)}));
+    const snfData=prod.filter(r=>r.data.mc_snf).map(r=>({date:r.date,value:parseFloat(r.data.mc_snf)}));
+    const munData=prod.filter(r=>r.data.mc_mun).map(r=>({date:r.date,value:parseFloat(r.data.mc_mun)}));
+    const fpData=prod.filter(r=>r.data.fp_ratio).map(r=>({date:r.date,value:parseFloat(r.data.fp_ratio)}));
+    const milkMax=milkData.length?Math.ceil(Math.max(...milkData.map(d=>d.value))*1.1/100)*100:5000;
+    const milkingMax=milkingData.length?Math.ceil(Math.max(...milkingData.map(d=>d.value))*1.2/10)*10:100;
+    html+='<div class="chart-card"><h3>出荷乳量 (kg)</h3>'+makeChart(milkData,0,milkMax,"#2D6B4A",null,null,"kg")+'</div>';
+    html+='<div class="chart-card"><h3>搾乳頭数</h3>'+makeChart(milkingData,0,milkingMax,"#3D8B60",null,null,"頭")+'</div>';
+    html+='<div class="chart-card"><h3>出荷頭数</h3>'+makeChart(shippedData,0,Math.max(10,...shippedData.map(d=>d.value||0))*1.3||20,"#C17D2A",null,null,"頭")+'</div>';
+    html+='<div class="chart-card"><h3>平均出荷乳量 (kg/頭)</h3>'+makeChart(avgData,0,Math.max(30,...avgData.map(d=>d.value||0))*1.2||60,"#2D6B4A",null,null,"kg/頭")+'</div>';
+    html+='<div class="chart-card"><h3>一頭当たり給餌量 (kg/頭)</h3>'+makeChart(woData,0,Math.max(30,...woData.map(d=>d.value||0))*1.2||60,"#C17D2A",null,null,"kg/頭")+'</div>';
+    html+='<div class="chart-card"><h3>実質乳価 (円/kg)</h3>'+makeChart(priceData,0,Math.max(100,...priceData.map(d=>d.value||0))*1.1||200,"#7B52AB",null,null,"円/kg")+'</div>';
+    html+='<div class="chart-card"><h3>乳脂肪率</h3>'+makeChart(fatData,2.5,5.5,"#C17D2A",null,null,"%")+'</div>';
+    html+='<div class="chart-card"><h3>乳蛋白質率</h3>'+makeChart(protData,2.5,4.5,"#2D6B4A",null,null,"%")+'</div>';
+    html+='<div class="chart-card"><h3>無脂固形分率</h3>'+makeChart(snfData,7,10,"#3D8B60",null,null,"%")+'</div>';
+    html+='<div class="chart-card"><h3>MUN</h3>'+makeChart(munData,5,25,"#7B52AB",10,16,"mg/dL")+'<div class="chart-note">帯 = 目安 10–16 mg/dL</div></div>';
+    html+='<div class="chart-card"><h3>F/P比（脂肪/蛋白）</h3>'+makeChart(fpData,0.8,1.6,"#2D6B4A",1.0,1.5,"")+'<div class="chart-note">帯 = 目安 1.00–1.50</div></div>';
+  }
+
+  else if(currentChartPage==="feces"){
+    const fec=fr.filter(r=>r.page==="feces");
+    const fecBallData=fec.filter(r=>r.data.ball).map(r=>({date:r.date,value:parseFloat(r.data.ball)}));
+    const fecMucusData=fec.filter(r=>r.data.mucus).map(r=>({date:r.date,value:parseFloat(r.data.mucus)}));
+    const fecPseudoData=fec.filter(r=>r.data.pseudomembrane).map(r=>({date:r.date,value:parseFloat(r.data.pseudomembrane)}));
+    const fecUndigData=fec.filter(r=>r.data.undigested).map(r=>({date:r.date,value:parseFloat(r.data.undigested)}));
+    html+='<div class="chart-card"><h3>糞団子（1:なし 2:1〜3 3:4以上）</h3>'+makeChart(fecBallData,0.5,3.5,"#8B4513",null,null,"")+'</div>';
+    html+='<div class="chart-card"><h3>粘液（1:なし 2:少量 3:多い）</h3>'+makeChart(fecMucusData,0.5,3.5,"#C17D2A",null,null,"")+'</div>';
+    html+='<div class="chart-card"><h3>偽膜（1:なし 2:1〜3 3:4以上）</h3>'+makeChart(fecPseudoData,0.5,3.5,"#B03A2E",null,null,"")+'</div>';
+    html+='<div class="chart-card"><h3>未消化の実（1:なし 2:1〜5 3:6以上）</h3>'+makeChart(fecUndigData,0.5,3.5,"#7B52AB",null,null,"")+'</div>';
+  }
+
+  else if(currentChartPage==="pssb"){
+    const pssbRecs=fr.filter(r=>r.page==="pssb");
+    const pssbTopData=pssbRecs.map(r=>({date:r.date,value:parseFloat(r.data.top_pct)||0}));
+    const pssbMid1Data=pssbRecs.map(r=>({date:r.date,value:parseFloat(r.data.mid1_pct)||0}));
+    const pssbMid2Data=pssbRecs.map(r=>({date:r.date,value:parseFloat(r.data.mid2_pct)||0}));
+    const pssbBotData=pssbRecs.map(r=>({date:r.date,value:parseFloat(r.data.bottom_pct)||0}));
+    html+='<div class="chart-card"><h3>PSPS - TOP (%)</h3>'+makeChart(pssbTopData,0,100,"#2D6B4A",null,null,"%")+'</div>';
+    html+='<div class="chart-card"><h3>PSPS - MID1 (%)</h3>'+makeChart(pssbMid1Data,0,100,"#3D8B60",null,null,"%")+'</div>';
+    html+='<div class="chart-card"><h3>PSPS - MID2 (%)</h3>'+makeChart(pssbMid2Data,0,100,"#C17D2A",null,null,"%")+'</div>';
+    html+='<div class="chart-card"><h3>PSPS - BOTTOM (%)</h3>'+makeChart(pssbBotData,0,100,"#B03A2E",null,null,"%")+'</div>';
+  }
+
+  el.innerHTML=html||'<div style="text-align:center;padding:40px 20px;color:var(--text2);">データがありません</div>';
+}
+
+// Bottom nav
+document.querySelectorAll(".bottom-nav button").forEach(btn=>{
+  btn.onclick=()=>{
+    currentView=btn.dataset.view;
+    document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("viewRecord").classList.toggle("hidden",currentView!=="record");
+    document.getElementById("viewList").classList.toggle("hidden",currentView!=="list");
+    document.getElementById("viewChart").classList.toggle("hidden",currentView!=="chart");
+    if(currentView==="list"){renderListNav();renderList();}
+    if(currentView==="chart"){renderChartNav();renderChart();}
+  };
+});
+
+load();
+document.getElementById("visitDate").value=todayStr();
+renderFarmSelect();renderPageNav();renderPageContent();
+</script>
+</body>
+</html>

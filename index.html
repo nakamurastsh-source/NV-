@@ -168,10 +168,24 @@ body::before{
     <div id="chartContent"></div>
   </div>
 
+  <div id="viewSettings" class="hidden">
+    <div class="card" style="margin:12px;">
+      <div class="card-title">データのバックアップ</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">全農場のすべての記録データ（生産データ・GS・CS・尿pH・糞便スコア・乳価情報など）を1つのファイルに保存できます。アプリの更新やスマホの機種変更の前に、必ずバックアップを取ることをおすすめします。</div>
+      <button class="save-btn" id="backupExportBtn">💾 バックアップを保存（ファイルに書き出す）</button>
+      <div style="font-size:13px;font-weight:700;color:var(--green2);margin:20px 0 10px;padding:6px 0;border-bottom:1px solid var(--green-light);">バックアップから復元</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">保存しておいたバックアップファイルを選ぶと、今のデータをすべて置き換えて復元します。復元前の今のデータは失われるのでご注意ください。</div>
+      <input type="file" id="backupRestoreInput" accept="application/json,.json" style="display:none;">
+      <button class="del-btn" id="backupRestoreBtn" style="width:100%;padding:12px;">📂 バックアップファイルから復元</button>
+      <div class="save-msg hidden" id="backupMsg"></div>
+    </div>
+  </div>
+
   <nav class="bottom-nav">
     <button class="active" data-view="record"><span class="nav-icon">✏️</span>記録</button>
     <button data-view="list"><span class="nav-icon">📋</span>一覧</button>
     <button data-view="chart"><span class="nav-icon">📈</span>グラフ</button>
+    <button data-view="settings"><span class="nav-icon">⚙️</span>設定</button>
   </nav>
 </div>
 
@@ -1689,10 +1703,50 @@ document.querySelectorAll(".bottom-nav button").forEach(btn=>{
     document.getElementById("viewRecord").classList.toggle("hidden",currentView!=="record");
     document.getElementById("viewList").classList.toggle("hidden",currentView!=="list");
     document.getElementById("viewChart").classList.toggle("hidden",currentView!=="chart");
+    document.getElementById("viewSettings").classList.toggle("hidden",currentView!=="settings");
     if(currentView==="list"){renderListNav();renderList();}
     if(currentView==="chart"){renderChartNav();renderChart();}
   };
 });
+
+// --- データのバックアップ／復元 ---
+function exportBackup(){
+  const payload={
+    app:"northvets-dairy-backup", version:1, exportedAt:new Date().toISOString(),
+    records, farms, currentFarm, fecesScoreGroupNames, milkPrices
+  };
+  const json=JSON.stringify(payload,null,2);
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([json],{type:"application/json"}));
+  a.download="牛群データ記録_バックアップ_"+todayStr()+".json";
+  a.click();
+  showMsg("backupMsg","バックアップファイルを保存しました");
+}
+document.getElementById("backupExportBtn").onclick=exportBackup;
+
+document.getElementById("backupRestoreBtn").onclick=()=>document.getElementById("backupRestoreInput").click();
+document.getElementById("backupRestoreInput").onchange=function(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    let d;
+    try{ d=JSON.parse(ev.target.result); }
+    catch(err){ showMsg("backupMsg","ファイルの読み込みに失敗しました（JSON形式ではありません）",true); e.target.value=""; return; }
+    if(!d||!Array.isArray(d.records)){ showMsg("backupMsg","このファイルはバックアップ形式ではありません",true); e.target.value=""; return; }
+    if(!confirm("現在のすべてのデータを、このバックアップファイルの内容で置き換えます。よろしいですか？\n（この操作は取り消せません）")){ e.target.value=""; return; }
+    records=d.records||[];
+    if(d.farms&&d.farms.length) farms=d.farms;
+    if(d.currentFarm&&farms.includes(d.currentFarm)) currentFarm=d.currentFarm;
+    if(d.fecesScoreGroupNames&&d.fecesScoreGroupNames.length===6) fecesScoreGroupNames=d.fecesScoreGroupNames;
+    if(d.milkPrices&&typeof d.milkPrices==="object") milkPrices=d.milkPrices;
+    if(!persist()){ showMsg("backupMsg","復元中に保存容量の上限に達しました",true); e.target.value=""; return; }
+    renderFarmSelect();renderPageNav();renderPageContent();
+    showMsg("backupMsg","復元しました（"+records.length+"件の記録）");
+    e.target.value="";
+  };
+  reader.readAsText(file);
+};
 
 load();
 document.getElementById("visitDate").value=todayStr();
